@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <title>免許証ジェネレータ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        article svg {
+            width: 100%;
+        }
+        input[type=text] {
+            display: block;
+            padding: 4px;
+            border: 1px solid #aaa;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="pt-4 pb-12">
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <h1 class="px-2 font-bold">免許証ジェネレータ</h1>
+
+        <div class="p-4 bg-gray-300">
+            <article></article>
+        </div>
+
+        <div class="flex">
+            <div class="p-2 m-2 w-32 bg-gray-900 hover:bg-gray-400 text-white text-center rounded-lg shadow-lg">
+                <button id="generate" type="button" onclick="createLicenseSvg();">変更を反映</button>
+            </div>
+
+            <div class="p-2 m-2 w-32 bg-gray-900 hover:bg-gray-400 text-white text-center rounded-lg shadow-lg">
+                <button onclick="downloadSvg(this);">画像を保存</button>
+            </div>
+        </div>
+
+        <div class="flex justify-between w-full mx-2 my-8 text-xs sm:text-sm md:text-base  text-center">
+            <div id="pictureTab" class="tab py-2 w-full border-b-2 border-gray-900">写真</div>
+            <div id="userTab" class="tab py-2 w-full border-b-2 border-gray-300">ユーザー</div>
+            <div id="addressTab" class="tab py-2 w-full border-b-2 border-gray-300">住所/交付</div>
+            <div id="conditionsTab" class="tab py-2 w-full border-b-2 border-gray-300">条件</div>
+            <div id="licenseDateTab" class="tab py-2 w-full border-b-2 border-gray-300">取得日</div>
+            <div id="licenseKindTab" class="tab py-2 w-full border-b-2 border-gray-300">種類</div>
+            <div id="otherTab" class="tab py-2 w-full border-b-2 border-gray-300">その他</div>
+        </div>
+
+        <form>
+            <div id="userTabContent" class="tab-content m-2 hidden">
+                <label for="name">氏名</label>
+                <input id="name" name="name" type="text" class="mt-1 mb-8 block w-96" value="ちびパレ" placeholder="ちびパレ" maxlength="100" />
+
+                <label for="birthDay">生年月日</label>
+                <input id="birthDay" name="birthDay" type="text" class="mt-1 w-24 w-96" value="令和05 年  05 月  23 日生" placeholder="令和05 年  05 月  23 日生" maxlength="30" />
+            </div>
+
+            <div id="addressTabContent" class="tab-content m-2 hidden">
+                <label for="address">住所</label>
+                <input id="address" name="address" type="text" class="mt-1 mb-8 block w-96" value="東京都新宿区西新宿2-8-1" placeholder="東京都新宿区西新宿2-8-1" maxlength="100" />
+
+                <label for="issueDay">交付年月日</label>
+                <input id="issueDay" name="issueDay" type="text" class="mt-1 mb-8 w-24 w-96" value="令和05 年  05 月  04 日" placeholder="令和05 年  05 月  04 日" maxlength="30" />
+
+                <label for="issueNumber">交付番号</label>
+                <input id="issueNumber" name="issueNumber" type="text" class="mt-1 mb-8 w-24 w-96" value="12345" placeholder="12345" maxlength="20" />
+
+                <label for="expirationDate">期限の文言</label>
+                <input id="expirationDate" name="expirationDate" type="text" class="mt-1 mb-8 w-96" value="2025年(令和07年)05月04日まで有効" placeholder="2025年(令和07年)10月01日まで有効" maxlength="30" />
+
+                <label>免許の色</label><br>
+                <input type="radio" id="gold" name="licenseColor" value="#b29e59" checked>
+                <label for="gold">金</label>
+                <input type="radio" id="blue" name="licenseColor" value="#2da6df">
+                <label for="blue">青</label>
+                <input type="radio" id="green" name="licenseColor" value="#a1e04b">
+                <label for="green">緑</label><br>
+
+                <label for="licenseNumber" class="mt-8 block">免許番号</label>
+                <input id="licenseNumber" name="licenseNumber" type="text" class="mt-1 w-96" value="123456789012" placeholder="123456789012" maxlength="20" />
+            </div>
+
+            <div id="conditionsTabContent" class="tab-content m-2 hidden">
+                <label>免許の条件</label>
+                <input id="licenseConditions1" name="licenseConditions1" type="text" class="mt-1 w-96 block" value="小型車はお買い物カートに限る" placeholder="中型車は中型車(8t)に限る" maxlength="30" />
+                <input id="licenseConditions2" name="licenseConditions2" type="text" class="mt-1 w-96 block" value="" placeholder="中型車(8t)と普通車はAT車に限る" maxlength="30" />
+                <input id="licenseConditions3" name="licenseConditions3" type="text" class="mt-1 w-96 block" value="" placeholder="大型車は自衛隊用自動車に限る" maxlength="30" />
+                <input id="licenseConditions4" name="licenseConditions4" type="text" class="mt-1 w-96 block" value="" placeholder="眼鏡等" maxlength="30" />
+            </div>
+
+            <div id="licenseDateTabContent" class="tab-content m-2 hidden">
+                <label for="bikeLicenseDay">二・小・原 取得年月日</label>
+                <input id="bikeLicenseDay" name="bikeLicenseDay" type="text" class="mt-1 w-96" value="令和00年 00月 00日" placeholder="令和00年 00月 00日" maxlength="30" />
+
+                <label for="otherLicenseDay" class="mt-8">他 取得年月日</label>
+                <input id="otherLicenseDay" name="otherLicenseDay" type="text" class="mt-1 w-96" value="令和00年 00月 00日" placeholder="令和00年 00月 00日" maxlength="30" />
+
+                <label for="secondClassLicenseDay" class="mt-8">二種 取得年月日</label>
+                <input id="secondClassLicenseDay" name="secondClassLicenseDay" type="text" class="mt-1 w-96" value="令和00年 00月 00日" placeholder="令和00年 00月 00日" maxlength="30" />
+            </div>
+
+            <div id="otherTabContent" class="tab-content m-2 hidden">
+                <label>組織名</label>
+                <input id="org1" name="org1" type="text" class="mt-1 w-32" value="イラス都" placeholder="イラス都" maxlength="30" />
+                <input id="org2" name="org2" type="text" class="mt-1 mb-8 w-32" value="公安委員会" placeholder="公安委員会" maxlength="30" />
+
+                <label for="licenseName">免許の名前</label>
+                <input id="licenseName" name="licenseName" type="text" class="mt-1 w-32" value="イラスト免許証" placeholder="イラスト免許証" maxlength="30" />
+            </div>
+
+            <div id="licenseKindTabContent" class="tab-content m-2 hidden">
+                <label>免許の種類</label><br>
+                <label><input type="checkbox" id="licenseKinds1" value="大型" class="sm:m-2">大型</label>
+                <label><input type="checkbox" id="licenseKinds2" value="中型" class="sm:m-2">中型</label>
+                <label><input type="checkbox" id="licenseKinds3" value="準中型" class="sm:m-2">準中型</label>
+                <label><input type="checkbox" id="licenseKinds4" value="普通" class="sm:m-2">普通</label>
+                <label><input type="checkbox" id="licenseKinds5" value="大特" class="sm:m-2">大特</label>
+                <label><input type="checkbox" id="licenseKinds6" value="大自二" class="sm:m-2">大自二</label>
+                <label><input type="checkbox" id="licenseKinds7" value="普自二" class="sm:m-2">普自二</label><br>
+                <label><input type="checkbox" id="licenseKinds8" value="小特" class="sm:m-2">小特</label>
+                <label><input type="checkbox" id="licenseKinds9" value="原付" class="sm:m-2">原付</label>
+                <label><input type="checkbox" id="licenseKinds10" value="大二" class="sm:m-2">大二</label>
+                <label><input type="checkbox" id="licenseKinds11" value="中二" class="sm:m-2">中二</label>
+                <label><input type="checkbox" id="licenseKinds12" value="普二" class="sm:m-2">普二</label>
+                <label><input type="checkbox" id="licenseKinds13" value="大特二" class="sm:m-2">大特二</label>
+                <label><input type="checkbox" id="licenseKinds14" value="引引二" class="sm:m-2">引引二</label>        </div>
+
+            <div id="pictureTabContent" class="tab-content m-2">
+                <label for="image">写真</label><br>
+                <input id="image" type="file" name="image" onchange="previewImage(this);" class="my-4">
+                <div>
+                    <img id="preview" alt="プレビュー" style="display: none;">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // SVG生成
+    const wrapper_width = 850;
+    const wrapper_height = 540;
+    const wrapper_radius = 30;
+    function createLicenseSvg() {
+        // パラメータの初期化
+        const inputParams = init();
+
+        // SVG描画領域の初期化
+        const svg = createSvg(0, 0, wrapper_width, wrapper_height);
+        const p = document.querySelector('article');
+        if (p.firstChild) {
+            p.removeChild(p.firstChild);
+        }
+        p.appendChild(svg);
+
+        // 土台を作成する
+        createBase();
+
+        // 背景を描く
+        drawBackground(inputParams.licenseColor);
+
+        // 線を引く
+        drawLines();
+
+        // 固定テキストを設定する
+        drawFixedText();
+
+        // 可変テキストを設定する
+        drawVariableText(inputParams);
+
+        // 画像を設定する
+        setPicture(inputParams);
+    }
+
+    // getElementByIdするメソッド
+    const getValue = (id) => {
+        const element = document.getElementById(id);
+        if (element) {
+            return element.value;
+        }
+        return null;
+    };
+
+    const init = () => {
+        const licenseKinds = [];
+        for (let i = 1; i <= 14; i++) {
+            const checkbox = document.getElementById(`licenseKinds${i}`);
+            if (checkbox.checked) {
+                licenseKinds.push({
+                    id: i,
+                    name: checkbox.value,
+                });
+            }
+        }
+
+        const licenseColorInputs = document.getElementsByName('licenseColor');
+        let selectedLicenseColor;
+        for (let i = 0; i < licenseColorInputs.length; i++) {
+            if (licenseColorInputs[i].checked) {
+                selectedLicenseColor = licenseColorInputs[i].value;
+                break;
+            }
+        }
+
+        return {
+            name: getValue('name'),
+            birthDay: getValue('birthDay'),
+            address: getValue('address'),
+            issueDay: getValue('issueDay'),
+            issueNumber: getValue('issueNumber'),
+            expirationDate: getValue('expirationDate'),
+            licenseConditions1: getValue('licenseConditions1'),
+            licenseConditions2: getValue('licenseConditions2'),
+            licenseConditions3: getValue('licenseConditions3'),
+            licenseConditions4: getValue('licenseConditions4'),
+            licenseNumber: getValue('licenseNumber'),
+            bikeLicenseDay: getValue('bikeLicenseDay'),
+            otherLicenseDay: getValue('otherLicenseDay'),
+            secondClassLicenseDay: getValue('secondClassLicenseDay'),
+            org1: getValue('org1'),
+            org2: getValue('org2'),
+            licenseColor: selectedLicenseColor,
+            licenseKinds: licenseKinds,
+            licenseName: getValue('licenseName'),
+        }
+    }
+
+    // SVG描画エリアの初期化
+    function createSvg(x1, y1, x2, y2) {
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("viewBox", `${x1} ${y1} ${x2} ${y2} `);
+        svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        svg.setAttribute("version", "1.1");
+        svg.setAttribute( "class", "license-svg");
+        svg.setAttribute("width", wrapper_width);
+        svg.setAttribute("height", wrapper_height);
+        return svg;
+    }
+
+    // 土台を作成する
+    function createBase() {
+        rect(0, 0, wrapper_width, wrapper_height, wrapper_radius, "#fff", "#000");
+    }
+
+    // 背景を描く
+    function drawBackground(color) {
+        // 有効期限
+        // #2da6df 青
+        // #b29e59 金
+        rect(30, 190, 500, 45, 0, color);
+
+        // 免許番号
+        rect(240, 377, 68, 25, 0, "#fcc");
+
+        // 種類
+        rect(337.5, 410, 192.5, 90, 0, "#fcc");
+        line(337.5, 455, 530, 410, "#fff");
+        line(337.5, 500, 530, 455, "#fff");
+    }
+
+    // 線を引く
+    function drawLines() {
+        // 氏名枠
+        rect(30, 30, 790, 40, 20, "none", "#000");
+
+        // メイン枠
+        rect(30, 110, 790, 400, 20, "none", "#000");
+
+        // 縦線
+        line(100, 30, 100, 70, "#000"); // 氏名
+        line(540, 30, 540, 70, "#000"); // 生年月日
+        line(100, 110, 100, 190, "#000"); // 住所
+        line(100, 370, 100, 510, "#000"); // 免許番号
+
+        // 横線
+        line(30, 150, 820, 150, "#000"); // 住所
+        line(30, 190, 575, 190, "#000"); // 交付
+        line(30, 410, 100, 410, "#000"); // 二・小・原
+        line(30, 440, 100, 440, "#000"); // 他
+        line(30, 470, 100, 470, "#000"); // 二種
+
+        // 種類枠
+        rect(310, 410, 220, 90, 0, "none", "#000"); // 枠
+        line(337.5, 410, 337.5, 500, "#000");
+        line(365, 410, 365, 500, "#000");
+        line(392.5, 410, 392.5, 500, "#000");
+        line(420, 410, 420, 500, "#000");
+        line(447.5, 410, 447.5, 500, "#000");
+        line(475, 410, 475, 500, "#000");
+        line(502.5, 410, 502.5, 500, "#000");
+        line(337.5, 455, 530, 455, "#000"); // 横線
+    }
+
+    function drawFixedText() {
+        text(50, 50, '氏名', '16px', '#000', false, 1.5);
+
+        text(50, 130, '住所', '16px', '#000');
+        text(50, 170, '交付', '16px', '#000');
+
+        text(50, 255, '免許の', '14px', '#000');
+        text(50, 280, '条件等', '14px', '#000');
+
+        text(45, 390, '番 号', '16px', '#000');
+        text(115, 390, '第', '16px', '#000');
+        text(440, 390, '号', '16px', '#000');
+
+        text(32.5, 425, '二･小･原', '16px', '#000');
+        text(55, 455, '他', '16px', '#000');
+        text(45, 490, '二 種', '16px', '#000');
+
+        text(323.75, 430, '種類', '16px', '#000', true, 16);
+
+        text(520, 525, 'ちびキャラパレット https://chibipalette.com', '12px', '#000');
+    }
+
+    function drawVariableText(params) {
+        // 免許証の名前
+        text(555, 200, params.licenseName, '22px', '#2af', true, 10);
+
+        // 氏名
+        text(120, 50, params.name, '20px', '#000');
+
+        // 生年月日
+        text(570, 50, params.birthDay, '18px', '#000');
+
+        // 住所
+        text(120, 130, params.address, '22px', '#000');
+
+        // 期限
+        text(50, 213, params.expirationDate, '24px', '#000');
+
+        // 交付年月日
+        text(160, 170, params.issueDay, '20px', '#000');
+
+        // 交付番号
+        text(410, 170, params.issueNumber, '20px', '#000');
+
+        // 免許の条件
+        text(140, 255, params.licenseConditions1, '20px', '#000');
+        text(140, 285, params.licenseConditions2, '20px', '#000');
+        text(140, 315, params.licenseConditions3, '20px', '#000');
+        text(140, 345, params.licenseConditions4, '20px', '#000');
+
+        // 優良マーク
+        if (params.licenseColor === '#b29e59') {
+            rect(60, 305, 60, 40, 10, "none", "#000", 4);
+            text(67.5, 325, '優良', '22px', '#000');
+        }
+
+        // 免許番号
+        text(180, 390, params.licenseNumber, '24px', '#000', false, 3);
+
+        // 取得日
+        text(115, 425, params.bikeLicenseDay, '18px', '#000');
+        text(115, 455, params.otherLicenseDay, '18px', '#000');
+        text(115, 485, params.secondClassLicenseDay, '18px', '#000');
+
+        // 種類
+        if (params.licenseKinds.some((element) => element.id === 1)) {
+            text(352, 415, '大型', '18px', '#000', true, 1.5);
+        } else {
+            text(345, 430, '-', '22px', '#000', false);
+        }
+
+        if (params.licenseKinds.some((element) => element.id === 2)) {
+            text(378, 415, '中型', '18px', '#000', true, 1.5);
+        } else {
+            text(374, 430, '-', '22px', '#000', false);
+        }
+
+        if (params.licenseKinds.some((element) => element.id === 3)) {
+            text(406, 410, '準中型', '16px', '#000', true, -1.5);
+        } else {
+            text(402, 430, '-', '22px', '#000', false);
+        }
+
+        if (params.licenseKinds.some((element) => element.id === 4)) {
+            text(433, 415, '普通', '18px', '#000', true, 1.5);
+        } else {
+            text(428, 430, '-', '22px', '#000', false);
+        }
+
+        if (params.licenseKinds.some((element) => element.id === 5)) {
+            text(461, 415, '大特', '18px', '#000', true, 1.5);
+        } else {
+            text(456, 430, '-', '22px', '#000', false);
+        }
+
+        if (params.licenseKinds.some((element) => element.id === 6)) {
+            text(488, 411, '大自ニ', '16px', '#000', true,-2);
+        } else {
+            text(483, 430, '-', '22px', '#000', false);
+        }
+
+        if (params.licenseKinds.some((element) => element.id === 7)) {
+            text(516, 411, '普自ニ', '16px', '#000', true, -2);
+        } else {
+            text(512, 430, '-', '22px', '#000', false);
+        }
+
+        if (params.licenseKinds.some((element) => element.id === 8)) {
+            text(352, 458, '小特', '18px', '#000', true, 1.5);
+        } else {
+            text(345, 475, '-', '22px', '#000', false);
+        }
+
+        if (params.licenseKinds.some((element) => element.id === 9)) {
+            text(378, 458, '原付', '18px', '#000', true, 1.5);
+        } else {
+            text(374, 475, '-', '22px', '#000', false);
+        }
+
+        if (params.licenseKinds.some((element) => element.id === 10)) {
+            text(406, 458, '大二', '18px', '#000', true, 1.5);
+        } else {
+            text(402, 475, '-', '22px', '#000', false);
+        }
+
+        if (params.licenseKinds.some((element) => element.id === 11)) {
+            text(433, 458, '中二', '18px', '#000', true, 1.5);
+        } else {
+            text(428, 475, '-', '22px', '#000', false);
+        }
+
+        if (params.licenseKinds.some((element) => element.id === 12)) {
+            text(461, 458, '普二', '18px', '#000', true, 1.5);
+        } else {
+            text(456, 475, '-', '22px', '#000', false);
+        }
+
+        if (params.licenseKinds.some((element) => element.id === 13)) {
+            text(488, 455, '大特ニ', '16px', '#000', true,-2);
+        } else {
+            text(483, 475, '-', '22px', '#000', false);
+        }
+
+        if (params.licenseKinds.some((element) => element.id === 14)) {
+            text(516, 455, '引引ニ', '16px', '#000', true, -2);
+        } else {
+            text(512, 475, '-', '22px', '#000', false);
+        }
+
+        // 組織
+        text(600, 470, params.org1, '16px', '#e62');
+        text(620, 495, params.org2, '16px', '#e62');
+    }
+
+    function setPicture() {
+        const preview = document.getElementById('preview');
+        image(preview.src, 577.5, 155, 240, 300);
+    }
+
+    function line(x1, y1, x2, y2, color) {
+        let line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', x1);
+        line.setAttribute('y1', y1);
+        line.setAttribute('x2', x2);
+        line.setAttribute('y2', y2);
+        line.setAttribute('stroke', color);
+        line.setAttribute('stroke-linejoin', 'round');
+        line.setAttribute('stroke-width', '2');
+        document.querySelector('svg.license-svg').appendChild(line);
+    }
+
+    function rect(startX, startY, width, height, radius, background, color, strokeWidth = 2) {
+        let rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', startX);
+        rect.setAttribute('y', startY);
+        rect.setAttribute('width', width);
+        rect.setAttribute('height', height);
+        rect.setAttribute('rx', radius);
+        rect.setAttribute('ry', radius);
+        rect.setAttribute('fill', background);
+        rect.setAttribute('stroke', color);
+        rect.setAttribute('stroke-width', strokeWidth);
+        document.querySelector('svg.license-svg').appendChild(rect);
+    }
+
+    function text(x, y, word, size, color, verticalWriting = false, letterSpacing = 1) {
+        let text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', x);
+        text.setAttribute('y', y);
+        text.setAttribute('fill', color);
+        text.setAttribute('stroke', 'none');
+        text.setAttribute('text-anchor', 'start');
+        text.setAttribute('dominant-baseline', 'central');
+        text.setAttribute('font-size', size);
+        text.setAttribute('font-weight', 'bold');
+        text.setAttribute('letter-spacing', letterSpacing)
+        if (verticalWriting) {
+            text.setAttribute('writing-mode', 'tb');
+        }
+        text.innerHTML = word;
+        document.querySelector('svg.license-svg').appendChild(text);
+    }
+
+    function image(src, x, y, width, height) {
+        let image = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+        image.setAttribute('x', x);
+        image.setAttribute('y', y);
+        image.setAttribute('width', width);
+        image.setAttribute('height', height);
+        image.setAttribute('href', src);
+        document.querySelector('svg.license-svg').appendChild(image);
+    }
+</script>
+<script>
+    // 初回表示時
+    createLicenseSvg();
+
+    const previewImage = (input) => {
+        const img = document.getElementById('preview');
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            img.src = e.target.result;
+            img.onload = () => {
+                const aspectRatio = img.width / img.height;
+                if (aspectRatio > 5 / 6) {
+                    const newWidth = img.height * 5 / 6;
+                    const trimLeft = (img.width - newWidth) / 2;
+                    const trimmedCanvas = document.createElement('canvas');
+                    trimmedCanvas.width = newWidth;
+                    trimmedCanvas.height = img.height;
+                    const trimmedCtx = trimmedCanvas.getContext('2d');
+                    trimmedCtx.drawImage(img, trimLeft, 0, newWidth, img.height, 0, 0, newWidth, img.height);
+                    img.src = trimmedCanvas.toDataURL();
+                } else {
+                    const newHeight = img.width * 6 / 5;
+                    const trimTop = (img.height - newHeight) / 2;
+                    const trimmedCanvas = document.createElement('canvas');
+                    trimmedCanvas.width = img.width;
+                    trimmedCanvas.height = newHeight;
+                    const trimmedCtx = trimmedCanvas.getContext('2d');
+                    trimmedCtx.drawImage(img, 0, trimTop, img.width, newHeight, 0, 0, img.width, newHeight);
+                    img.src = trimmedCanvas.toDataURL();
+                }
+                img.style.display = 'block';
+            };
+        };
+        reader.readAsDataURL(input.files[0]);
+    };
+
+    const downloadSvg = () => {
+        const svg = (document.getElementsByClassName('license-svg'))[0];
+
+        let canvas = document.createElement('canvas')
+        canvas.width = svg.width.baseVal.value
+        canvas.height = svg.height.baseVal.value
+
+        const ctx = canvas.getContext('2d')
+        let image = new Image()
+
+        image.onload = () => {
+            // SVGデータをPNG形式に変換する
+            ctx.drawImage(image, 0, 0, image.width, image.height)
+
+            let link = document.createElement("a")
+            link.href = canvas.toDataURL()
+            link.download = "license.png"
+            link.click()
+        }
+        image.onerror = (error) => {
+            console.log(error)
+        }
+
+        // SVGデータをXMLで取り出す
+        const svgData = new XMLSerializer().serializeToString(svg)
+        image.src = 'data:image/svg+xml;charset=utf-8;base64,' + btoa(unescape(encodeURIComponent(svgData)))
+    }
+
+    const tab = document.getElementsByClassName("tab");
+    const tabs = Array.from(tab);
+    tabs.forEach(function(target) {
+        target.addEventListener('click', function() {
+            // タブを全部非アクティブにする
+            tabs.forEach(function(tab) {
+                tab.classList.remove('border-gray-900');
+                tab.classList.add('border-gray-300');
+            });
+            // クリックしたタブをアクティブにする
+            target.classList.remove('border-gray-300');
+            target.classList.add('border-gray-900');
+
+            // 全てのtabコンテンツを非表示にする
+            const tabContents = document.getElementsByClassName('tab-content');
+            Array.from(tabContents).forEach(function(content) {
+                content.classList.add('hidden');
+            });
+            // クリックされたタブのコンテンツを表示する
+            const tabContentId = target.id + 'Content';
+            const activeContent = document.getElementById(tabContentId);
+            activeContent.classList.remove('hidden');
+        });
+    });
+</script>
+</body>
+</html>
